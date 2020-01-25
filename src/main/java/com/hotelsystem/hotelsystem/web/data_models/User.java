@@ -6,6 +6,7 @@ import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 
 public class User {
     @Id
@@ -17,7 +18,10 @@ public class User {
     private UserType userRole;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
-    private Set<Reservation> reservation = new HashSet<>();
+    private Set<Reservation> reservations = new HashSet<>();
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
+    private Set<Opinion> opinions = new HashSet<>();
 
     public User(String pesel, String password, String name, String surname, String emailAddress, UserType userRole) {
         this.pesel = pesel;

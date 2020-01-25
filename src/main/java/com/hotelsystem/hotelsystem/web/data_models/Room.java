@@ -1,5 +1,6 @@
 package com.hotelsystem.hotelsystem.web.data_models;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
@@ -12,10 +13,10 @@ public class Room {
     private long slot_number;
     private double price_per_day;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "room")
     private Hotel hotel;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "room")
     private RoomInfo roomInfo;
 
     @ManyToOne

@@ -1,7 +1,9 @@
 package com.hotelsystem.hotelsystem.web.data_models;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.OneToOne;
 
 @Entity
 public class Hotel {
@@ -11,6 +13,15 @@ public class Hotel {
     private String country;
     private long stars;
 
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "hotel")
+    private Room room;
+
+    public Hotel(String name, String city, String country, long stars){
+        this.name = name;
+        this.city = city;
+        this.country = country;
+        this.stars = stars;
+    }
     public Hotel(){
 
     }
