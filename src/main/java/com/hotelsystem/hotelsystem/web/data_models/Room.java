@@ -1,10 +1,13 @@
 package com.hotelsystem.hotelsystem.web.data_models;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
+import javax.persistence.OneToMany;
 
 @Entity
 public class Room {
@@ -13,14 +16,14 @@ public class Room {
     private long slot_number;
     private double price_per_day;
 
-    @OneToOne(cascade = CascadeType.ALL, mappedBy = "room")
+    @ManyToOne
     private Hotel hotel;
 
-    @OneToOne(cascade = CascadeType.ALL, mappedBy = "room")
+    @ManyToOne
     private RoomInfo roomInfo;
 
-    @ManyToOne
-    private Reservation reservation;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "room")
+    private Set<Reservation> reservation = new HashSet<>();
 
     public Room(long room_number, long slot_number, double price_per_day){
         this.room_number = room_number;

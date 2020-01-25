@@ -4,10 +4,11 @@ import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 
+@Entity
 public class User {
     @Id
     private String pesel;
@@ -15,15 +16,12 @@ public class User {
     private String name;
     private String surname;
     private String emailAddress;
-    private UserType userRole;
+    private String userRole;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
     private Set<Reservation> reservations = new HashSet<>();
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
-    private Set<Opinion> opinions = new HashSet<>();
-
-    public User(String pesel, String password, String name, String surname, String emailAddress, UserType userRole) {
+    public User(String pesel, String password, String name, String surname, String emailAddress, String userRole) {
         this.pesel = pesel;
         this.password = password;
         this.name = name;
@@ -76,11 +74,11 @@ public class User {
         this.emailAddress = emailAddress;
     }
 
-    public UserType getUserRole() {
+    public String getUserRole() {
         return userRole;
     }
 
-    public void setUserRole(UserType userRole) {
+    public void setUserRole(String userRole) {
         this.userRole = userRole;
     }
 }

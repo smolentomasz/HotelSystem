@@ -23,8 +23,8 @@ public class Reservation {
     @ManyToOne
     private User user;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "reservation")
-    private Set<Room> room = new HashSet<>();
+    @ManyToOne
+    private Room room;
 
     public Reservation(String start_date, String end_date, double price, User user) {
         this.start_date = start_date;
