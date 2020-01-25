@@ -53,4 +53,28 @@ public class Room {
     public RoomInfo getRoomInfo() {
         return roomInfo;
     }
+
+    public void setRoom_number(long room_number) {
+        this.room_number = room_number;
+    }
+
+    public void setSlot_number(long slot_number) {
+        this.slot_number = slot_number;
+    }
+
+    public void setPrice_per_day(double price_per_day) {
+        this.price_per_day = price_per_day;
+    }
+
+    public void setHotel(Hotel hotel) {
+        this.hotel = hotel;
+    }
+
+    public void setRoomInfo(RoomInfo roomInfo) {
+        this.roomInfo = roomInfo;
+    }
+
+    public void setReservation(Set<Reservation> reservation) {
+        this.reservation = reservation;
+    }
 }
