@@ -2,6 +2,7 @@ package com.hotelsystem.hotelsystem.web.controller;
 
 
 import com.hotelsystem.hotelsystem.web.data_models.Guestbook;
+import com.hotelsystem.hotelsystem.web.data_models.ServerResponse;
 import com.hotelsystem.hotelsystem.web.repositories.GuestbookRepository;
 import com.hotelsystem.hotelsystem.web.repositories.UserRepository;
 
@@ -32,13 +33,13 @@ public class GuestbookController {
     }
 
     @PostMapping("/guestbook")
-    public ResponseEntity<Guestbook> addOpinion(@RequestBody Map<String, String> body) {
+    public ResponseEntity<?> addOpinion(@RequestBody Map<String, String> body) {
         String nickname = body.get("nickname");
         String opinion = body.get("opinion");
 
         Guestbook newOpinion;
         if (nickname.isEmpty() || opinion.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ServerResponse(HttpStatus.BAD_REQUEST, "Missing or invalid data", "/guestbook"), HttpStatus.BAD_REQUEST);
         } else {
             newOpinion = new Guestbook(opinion, nickname);
             return ResponseEntity.ok().body(guestbookRepository.save(newOpinion));
@@ -47,13 +48,13 @@ public class GuestbookController {
     }
 
     @PutMapping("/guestbook/{id}")
-    public ResponseEntity<Guestbook> updateOpinion(@PathVariable("id") Long opinion_id, @RequestBody Map<String, String> body) {
+    public ResponseEntity<?> updateOpinion(@PathVariable("id") Long opinion_id, @RequestBody Map<String, String> body) {
         String nickname = body.get("nickname");
         String opinion = body.get("opinion");
 
         Guestbook updatedOpinion;
         if (nickname.isEmpty() || opinion.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ServerResponse(HttpStatus.BAD_REQUEST, "Missing or invalid data", "/guestbook/{id}"), HttpStatus.BAD_REQUEST);
         } else {
             if (guestbookRepository.findById(opinion_id).isPresent()) {
                 updatedOpinion = guestbookRepository.findById(opinion_id).get();
@@ -61,22 +62,22 @@ public class GuestbookController {
                 updatedOpinion.setNickname(nickname);
                 return ResponseEntity.ok().body(guestbookRepository.save(updatedOpinion));
             } else {
-                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+                return new ResponseEntity<>(new ServerResponse(HttpStatus.NOT_FOUND, "Opinion with id" + opinion_id + " not found", "/guestbook/{id}"), HttpStatus.NOT_FOUND);
             }
 
         }
 
     }
     @DeleteMapping("/guestbook/{id}")
-    public ResponseEntity<Void> deleteOpinion(@PathVariable("id") Long opinion_id){
+    public ResponseEntity<?> deleteOpinion(@PathVariable("id") Long opinion_id){
         Guestbook getOpinion;
         if(guestbookRepository.findById(opinion_id).isPresent()){
             getOpinion = guestbookRepository.findById(opinion_id).get();
             guestbookRepository.delete(getOpinion);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            return new ResponseEntity<>(new ServerResponse(HttpStatus.NO_CONTENT, "Deleted opinion with id " + opinion_id + " succesfully", "/guestbook/{id}"),HttpStatus.NO_CONTENT);
         }
         else{
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(new ServerResponse(HttpStatus.NOT_FOUND, "Opinion with id " + opinion_id + " not found", "/guestbook/{id}"), HttpStatus.NOT_FOUND);
         }
     }
 }

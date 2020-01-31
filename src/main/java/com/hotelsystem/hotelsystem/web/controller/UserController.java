@@ -1,6 +1,7 @@
 package com.hotelsystem.hotelsystem.web.controller;
 
 import com.hotelsystem.hotelsystem.web.data_models.AuthenticationResponse;
+import com.hotelsystem.hotelsystem.web.data_models.ServerResponse;
 import com.hotelsystem.hotelsystem.web.data_models.User;
 import com.hotelsystem.hotelsystem.web.repositories.UserRepository;
 import com.hotelsystem.hotelsystem.web.security.HotelSystemUserDetailService;
@@ -14,11 +15,8 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.Map;
 
 @RestController
 public class UserController {
@@ -39,24 +37,13 @@ public class UserController {
         try {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(login, password));
         }catch(BadCredentialsException e){
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(new ServerResponse(HttpStatus.UNAUTHORIZED, "Unauthorized", "/login"), HttpStatus.UNAUTHORIZED);
         }
 
         final UserDetails userDetails = userDetailService.loadUserByUsername(login);
         final String jwt = jwtUtil.generateToken(userDetails);
+        User user = userRepository.findByPesel(login);
 
-        return ResponseEntity.ok(new AuthenticationResponse(jwt));
-    }
-
-    @PostMapping("/user")
-    public ResponseEntity<User> addNewUser(@RequestBody Map<String, String> body){
-        String pesel = body.get("pesel");
-        String name = body.get("name");
-        String surname = body.get("surname");
-        String email = body.get("email");
-        String password = body.get("password");
-        String userRole = body.get("role");
-
-        return ResponseEntity.ok().body(userRepository.save(new User(pesel, password, name, surname, email, userRole)));
+        return ResponseEntity.ok(new AuthenticationResponse(jwt, user.getName(), user.getSurname(), user.getEmailAddress()));
     }
 }

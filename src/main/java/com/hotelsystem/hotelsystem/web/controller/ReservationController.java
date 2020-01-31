@@ -2,6 +2,7 @@ package com.hotelsystem.hotelsystem.web.controller;
 
 import com.hotelsystem.hotelsystem.web.data_models.Reservation;
 import com.hotelsystem.hotelsystem.web.data_models.Room;
+import com.hotelsystem.hotelsystem.web.data_models.ServerResponse;
 import com.hotelsystem.hotelsystem.web.data_models.User;
 import com.hotelsystem.hotelsystem.web.repositories.ReservationRepository;
 import com.hotelsystem.hotelsystem.web.repositories.RoomRepository;
@@ -20,7 +21,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.Duration;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -40,7 +40,7 @@ public class ReservationController {
     }
 
     @PostMapping("/reservation")
-    public ResponseEntity<Reservation> addNewReservation(@RequestBody Map<String, String> body) throws ParseException {
+    public ResponseEntity<?> addNewReservation(@RequestBody Map<String, String> body) throws ParseException {
         String pesel = body.get("client_id");
         Long room_id = Long.parseLong(body.get("room_id"));
         String start_date = body.get("start_date");
@@ -50,7 +50,7 @@ public class ReservationController {
         Room getRoom;
         Reservation newReservation;
         if (pesel.isEmpty() || room_id == null || start_date.isEmpty() || end_date.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ServerResponse(HttpStatus.BAD_REQUEST, "Missing or invalid data", "/reservation"), HttpStatus.BAD_REQUEST);
         } else {
             if (userRepository.findById(pesel).isPresent()) {
                 if (roomRepository.findById(room_id).isPresent()) {
@@ -67,24 +67,24 @@ public class ReservationController {
                     newReservation = new Reservation(start_date, end_date, summaryPrice, getUser, getRoom);
                     return ResponseEntity.ok().body(reservationRepository.save(newReservation));
                 } else {
-                    return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+                    return new ResponseEntity<>(new ServerResponse(HttpStatus.NOT_FOUND, "Room with number" + room_id + " not found", "/reservation"), HttpStatus.NOT_FOUND);
                 }
             } else {
-                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+                return new ResponseEntity<>(new ServerResponse(HttpStatus.NOT_FOUND, "User with username" + pesel + " not found", "/reservation"), HttpStatus.NOT_FOUND);
             }
         }
     }
 
     @GetMapping("/reservation/{id}")
-    public ResponseEntity<List<Reservation>> getAllUserReservation(@PathVariable("id") String pesel) {
+    public ResponseEntity<?> getAllUserReservation(@PathVariable("id") String pesel) {
         if (userRepository.findById(pesel).isPresent()) {
             return ResponseEntity.ok().body(reservationRepository.findAll());
         } else
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(new ServerResponse(HttpStatus.NOT_FOUND, "User with username" + pesel + " not found", "/reservation"), HttpStatus.NOT_FOUND);
     }
 
     @PutMapping("/reservation/{id}")
-    public ResponseEntity<Reservation> updateReservation(@PathVariable("id") Long reservation_id, @RequestBody Map<String, String> body) throws ParseException {
+    public ResponseEntity<?> updateReservation(@PathVariable("id") Long reservation_id, @RequestBody Map<String, String> body) throws ParseException {
         String pesel = body.get("client_id");
         Long room_id = Long.parseLong(body.get("room_id"));
         String start_date = body.get("start_date");
@@ -93,7 +93,7 @@ public class ReservationController {
         Room getRoom;
         Reservation getReservation;
         if (pesel.isEmpty() || room_id == null || start_date.isEmpty() || end_date.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ServerResponse(HttpStatus.BAD_REQUEST, "Missing or invalid data", "/reservation/{id}"), HttpStatus.BAD_REQUEST);
         } else {
             if (reservationRepository.findById(reservation_id).isPresent()) {
                 getReservation = reservationRepository.findById(reservation_id).get();
@@ -117,37 +117,37 @@ public class ReservationController {
                             getReservation.setPrice(summaryPrice);
                             return ResponseEntity.ok().body(reservationRepository.save(getReservation));
                         } else {
-                            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+                            return new ResponseEntity<>(new ServerResponse(HttpStatus.NOT_FOUND, "Room with number" + room_id + " not found", "/reservation/{id}"), HttpStatus.NOT_FOUND);
                         }
                     } else {
-                        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+                        return new ResponseEntity<>(new ServerResponse(HttpStatus.NOT_FOUND, "User with username" + pesel + " not found", "/reservation/{id}"), HttpStatus.NOT_FOUND);
                     }
 
                 } else {
-                    return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+                    return new ResponseEntity<>(new ServerResponse(HttpStatus.FORBIDDEN, "Access denied", "/reservation/{id}"), HttpStatus.FORBIDDEN);
                 }
             } else
-                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+                return new ResponseEntity<>(new ServerResponse(HttpStatus.NOT_FOUND, "Reservation with id" + reservation_id + " not found", "/reservation/{id}"), HttpStatus.NOT_FOUND);
         }
     }
 
     @DeleteMapping("/reservation/{id}")
-    public ResponseEntity<Void> deleteReservation(@PathVariable("id") Long reservation_id, @RequestBody Map<String, String> body) {
+    public ResponseEntity<?> deleteReservation(@PathVariable("id") Long reservation_id, @RequestBody Map<String, String> body) {
         String pesel = body.get("client_id");
         Reservation getReservation;
         if (pesel.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ServerResponse(HttpStatus.BAD_REQUEST, "Missing or invalid data", "/reservation/{id}"), HttpStatus.BAD_REQUEST);
         } else {
             if (reservationRepository.findById(reservation_id).isPresent()) {
                 getReservation = reservationRepository.findById(reservation_id).get();
                 if (getReservation.getUser().getPesel().equals(pesel)) {
                     reservationRepository.delete(getReservation);
-                    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+                    return new ResponseEntity<>(new ServerResponse(HttpStatus.NO_CONTENT, "Deleted reservation with id " + reservation_id + " succesfully", "/guestbook/{id}"),HttpStatus.NO_CONTENT);
                 } else {
-                    return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+                    return new ResponseEntity<>(new ServerResponse(HttpStatus.FORBIDDEN, "Access denied", "/reservation/{id}"), HttpStatus.FORBIDDEN);
                 }
             } else {
-                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+                return new ResponseEntity<>(new ServerResponse(HttpStatus.NOT_FOUND, "Reservation with id" + reservation_id + " not found", "/reservation/{id}"), HttpStatus.NOT_FOUND);
             }
         }
     }
