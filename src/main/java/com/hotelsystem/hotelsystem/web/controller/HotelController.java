@@ -18,10 +18,6 @@ public class HotelController {
     @Autowired
     private HotelRepository hotelRepository;
 
-    @GetMapping("/")
-    public String home() {
-        return "Home page";
-    }
     @GetMapping("/hotels")
     public ResponseEntity<List<Hotel>> allHotels(){
         return ResponseEntity.ok().body(hotelRepository.findAll());

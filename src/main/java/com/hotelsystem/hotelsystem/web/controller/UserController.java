@@ -33,17 +33,21 @@ public class UserController {
     private HotelSystemUserDetailService userDetailService;
 
     @PostMapping("/login")
-    public ResponseEntity<?> createToken(@RequestHeader("Login") String login, @RequestHeader("Password") String password){
-        try {
-            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(login, password));
-        }catch(BadCredentialsException e){
-            return new ResponseEntity<>(new ServerResponse(HttpStatus.UNAUTHORIZED, "Unauthorized", "/login"), HttpStatus.UNAUTHORIZED);
+    public ResponseEntity<?> createToken(@RequestHeader("Login") String login, @RequestHeader("Password") String password) {
+        if (login.isEmpty() || password.isEmpty()) {
+            return new ResponseEntity<>(new ServerResponse(HttpStatus.BAD_REQUEST, "Missing or invalid data during login process.", "/login"), HttpStatus.BAD_REQUEST);
+        } else {
+            try {
+                authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(login, password));
+            } catch (BadCredentialsException e) {
+                return new ResponseEntity<>(new ServerResponse(HttpStatus.UNAUTHORIZED, "Unauthorized", "/login"), HttpStatus.UNAUTHORIZED);
+            }
+
+            final UserDetails userDetails = userDetailService.loadUserByUsername(login);
+            final String jwt = jwtUtil.generateToken(userDetails);
+            User user = userRepository.findByPesel(login);
+
+            return ResponseEntity.ok(new AuthenticationResponse(jwt, user.getName(), user.getSurname(), user.getEmailAddress()));
         }
-
-        final UserDetails userDetails = userDetailService.loadUserByUsername(login);
-        final String jwt = jwtUtil.generateToken(userDetails);
-        User user = userRepository.findByPesel(login);
-
-        return ResponseEntity.ok(new AuthenticationResponse(jwt, user.getName(), user.getSurname(), user.getEmailAddress()));
     }
 }
